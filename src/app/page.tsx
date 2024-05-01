@@ -3,7 +3,7 @@
 import Image from "next/image";
 import "./normalize.css";
 import styled, { css } from "styled-components";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { DropDownLi, Dropbtn, DropDownContent, SubA } from "./Menu";
 import { useLongPress } from "use-long-press";
 
@@ -13,7 +13,9 @@ const Header = styled.header`
 `;
 
 const HeaderTitle = styled.div`
+  padding-top: 20px;
   padding-bottom: 20px;
+  font-size: large;
 `;
 
 interface RollingTask {
@@ -95,9 +97,6 @@ const WeekDate = styled.div`
     user-select: none;
   }
 
-  span + span {
-    border-left: 1px #e1e1e1 solid;
-  }
   div + div {
     border-left: 1px #e1e1e1 solid;
   }
@@ -134,7 +133,7 @@ const RollingTaskTimeStatusMap = {
 };
 function Point({
   status,
-  onClick = () => {} ,
+  onClick = () => {},
 }: {
   status: RollingTaskTimeStatus | undefined;
   onClick?: any;
@@ -177,7 +176,17 @@ const Tips = styled.div`
   border: 1px black solid;
   padding: 0px 12px 8px 12px;
 `;
+
 export default function Home() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  const weekText = {
+    ch: ["日", "一", "二", "三", "四", "五", "六"],
+    en: ["S", "M", "T", "W", "T", "F", "S"],
+  };
   const [tasks, setTasks] = useState(data);
   const [openTask, setOpenTask] = useState("");
 
@@ -241,22 +250,29 @@ export default function Home() {
       })
     );
   }
+  function handleDropdownClick(
+    task: RollingTask,
+    date: Date,
+    state: RollingTaskTimeStatus
+  ) {
+    setOpenTask("");
 
+    handleStateChange(task, date, state);
+  }
   const Task = ({
     className,
-    children,
     todo,
   }: {
     className?: string;
     children?: JSX.Element;
     todo: RollingTask;
   }) => {
-    const callback = useCallback((evnet: string, meta: { context: any }) => {
+    const longpressCb = useCallback((evnet: string, meta: { context: any }) => {
       setOpenTask(meta.context);
     }, []);
 
     //@ts-ignore
-    const bind = useLongPress(callback);
+    const bind = useLongPress(longpressCb);
     return (
       <Flex className={className}>
         <WeekDate>
@@ -275,19 +291,17 @@ export default function Home() {
                   {enumValues.map((status, i) => {
                     return (
                       <Point
-                        key={currentId + i}
+                        key={i}
                         //@ts-ignore
                         status={RollingTaskTimeStatus[status]}
-                        onClick={() => {
-                          setOpenTask("");
-
-                          handleStateChange(
+                        onClick={() =>
+                          handleDropdownClick(
                             todo,
                             d,
                             //@ts-ignore
                             RollingTaskTimeStatus[status]
-                          );
-                        }}
+                          )
+                        }
                       />
                     );
                   })}
@@ -300,14 +314,32 @@ export default function Home() {
       </Flex>
     );
   };
+
+  let month_text = "月份";
+
+  if (isClient) {
+    if (new Date().getMonth() != getMonday(new Date()).getMonth()) {
+      month_text = `${getMonday(new Date()).toLocaleString("default", {
+        month: "long",
+      })} - ${new Date().toLocaleString("default", { month: "long" })}`;
+    } else {
+      month_text = getMonday(new Date()).toLocaleString("default", {
+        month: "long",
+      });
+    }
+  }
+
   return (
     <>
       <Header>
         <div style={{ padding: "0 10px" }}>
-          <HeaderTitle>April</HeaderTitle>
+          <HeaderTitle>{month_text}</HeaderTitle>
           <WeekDate>
             {week.map((d, i) => (
-              <span key={i}>{d.getDate()}</span>
+              <Flex key={i} style={{ flexDirection: "column" }}>
+                <span>{weekText["ch"][d.getDay()]}</span>
+                <span>{d.getDate()}</span>
+              </Flex>
             ))}
           </WeekDate>
         </div>

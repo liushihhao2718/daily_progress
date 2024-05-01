@@ -134,7 +134,7 @@ const RollingTaskTimeStatusMap = {
 };
 function Point({
   status,
-  onClick = null,
+  onClick = () => {} ,
 }: {
   status: RollingTaskTimeStatus | undefined;
   onClick?: any;
@@ -143,7 +143,7 @@ function Point({
     return (
       <span
         style={{ fontSize: "24px", color: "black" }}
-        onClick={() => onClick ?? onClick()}
+        onClick={() => onClick()}
       >
         &nbsp;&nbsp;
       </span>
@@ -154,7 +154,7 @@ function Point({
     return (
       <span
         style={{ fontSize: "24px", color: "lightgray" }}
-        onClick={() => onClick ?? onClick()}
+        onClick={() => onClick()}
       >
         {RollingTaskTimeStatusMap[status]}
       </span>
@@ -163,7 +163,7 @@ function Point({
     return (
       <span
         style={{ fontSize: "24px", color: "black" }}
-        onClick={() => onClick ?? onClick()}
+        onClick={() => onClick()}
       >
         {RollingTaskTimeStatusMap[status]}
       </span>

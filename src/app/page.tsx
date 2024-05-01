@@ -137,7 +137,7 @@ function Point({
   onClick = null,
 }: {
   status: RollingTaskTimeStatus | undefined;
-  onClick: any;
+  onClick?: any;
 }) {
   if (status == undefined) {
     return (
